@@ -1,7 +1,7 @@
 try:
     import mmf_setup
     mmf_setup.nbinit()
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     import subprocess
     import sys
     from IPython.display import HTML, Javascript, display
