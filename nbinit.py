@@ -115,6 +115,6 @@ MathJax.Hub.Config({
         HGROOT = subprocess.check_output(['hg', 'root']).strip()
         if HGROOT not in sys.path:
             sys.path.insert(0, HGROOT)
-    except subprocess.CalledProcessError:
+    except (FileNotFoundError, subprocess.CalledProcessError):
         # Could not run hg or not in a repo.
         pass
