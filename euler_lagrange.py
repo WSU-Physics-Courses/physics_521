@@ -18,7 +18,7 @@ def my_lambdify(args, expr):
             return 0
     args = list(args)
     _args = symbols('t:{}'.format(len(args)))
-    subs = zip(args, _args)
+    subs = list(zip(args, _args))
     subs.sort(key=order)
     _expr = expr.subs(subs)
     return sympy.lambdify(_args, _expr, 'numpy')
@@ -35,7 +35,7 @@ def get_rhs(L, funcs, var, simplify=False):
     orders = [ode_order(L, _f) for _f in funcs]
     dfuncs = [_f.diff(var, _o+1) for _f, _o in zip(funcs, orders)]
     #_dfuncs = symbols('tmp_:{}'.format(len(dfuncs)))
-    #dsubs = zip(dfuncs, _dfuncs)
+    #dsubs = list(zip(dfuncs, _dfuncs))
 
     eqs = sympy.euler_equations(L, funcs=funcs, vars=(var,))
     A = []
@@ -52,7 +52,7 @@ def get_rhs(L, funcs, var, simplify=False):
                                             simplify=simplify)
     return res
 
-
+'''
 # %load /data/apps/anaconda/envs/work/lib/python2.7/site-packages/sympy/calculus/euler.py
 from sympy import Function, sympify, diff, Eq, S, Symbol, Derivative
 from sympy.core.compatibility import (combinations_with_replacement, iterable)
@@ -152,3 +152,4 @@ def _euler_equations(L, funcs=(), vars=()):
         eqns.append(Eq(eq))
 
     return eqns
+'''

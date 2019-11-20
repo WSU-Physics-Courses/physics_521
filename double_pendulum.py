@@ -76,72 +76,72 @@ def draw_figure():
     p.text(r'$m_2$', theta1=th1, r1=r1, theta2=th2-0.2, r2=r2)
 
 
-'''
-import euler_lagrange
+def get_eqs():
+    from . import euler_lagrange
 
-th1, th2 = symbols(r'\theta_1, \theta_2', real=True, function=True)
+    th1, th2 = symbols(r'\theta_1, \theta_2', real=True, cls=sympy.Function)
 
-t, g, r1, r2, m1, m2 = symbols('t, g, r_1, r_2, m_1, m_2', positive=True)
+    t, g, r1, r2, m1, m2 = symbols('t, g, r_1, r_2, m_1, m_2', positive=True)
 
-ms = [m1, m2]
-rs = [r1, r2]
+    ms = [m1, m2]
+    rs = [r1, r2]
 
-ths = [th1(t), th2(t)]
-dths = [_f.diff(t) for _f in ths]
-ddths = [_df.diff(t) for _df in dths]
-funcs = ths
-dfuncs = [_f.diff(t) for _f in funcs]
-ddfuncs = [_df.diff(t) for _df in dfuncs]
+    ths = [th1(t), th2(t)]
+    dths = [_f.diff(t) for _f in ths]
+    ddths = [_df.diff(t) for _df in dths]
+    funcs = ths
+    dfuncs = [_f.diff(t) for _f in funcs]
+    ddfuncs = [_df.diff(t) for _df in dfuncs]
 
-# These are substitutions to make things look nicer by replacing
-# derivatives with dots.
-vsubs = []
-vsubs.extend((_d, symbols(r'\ddot{%s}' % (_d.expr.func,))) for _d in ddfuncs)
-vsubs.extend((_d, symbols(r'\dot{%s}' % (_d.expr.func,))) for _d in dfuncs)
-vsubs.extend((_d, symbols(str(_d.func))) for _d in funcs)
-ddth1, ddth2 = symbols(r'\ddot{\theta}_1, \ddot{\theta}_2')
+    # These are substitutions to make things look nicer by replacing
+    # derivatives with dots.
+    vsubs = []
+    vsubs.extend((_d, symbols(r'\ddot{%s}' % (_d.expr.func,))) for _d in ddfuncs)
+    vsubs.extend((_d, symbols(r'\dot{%s}' % (_d.expr.func,))) for _d in dfuncs)
+    vsubs.extend((_d, symbols(str(_d.func))) for _d in funcs)
+    ddth1, ddth2 = symbols(r'\ddot{\theta}_1, \ddot{\theta}_2')
 
-# Here we express x and y in terms of the thetas
-(_, x1, x2), (_, y1, y2) = get_xy(*(ths + rs), np=sympy)
+    # Here we express x and y in terms of the thetas
+    (_, x1, x2), (_, y1, y2) = get_xy(*(ths + rs), np=sympy)
 
-K = trigsimp(
-    m1/2*(x1.diff(t)**2 + y1.diff(t)**2)
-    + m2/2*(x2.diff(t)**2 + y2.diff(t)**2)
-    )
-V = trigsimp(g*(m1*y1 + m2*y2))
-L = K - V
+    K = trigsimp(
+        m1/2*(x1.diff(t)**2 + y1.diff(t)**2)
+        + m2/2*(x2.diff(t)**2 + y2.diff(t)**2)
+        )
+    V = trigsimp(g*(m1*y1 + m2*y2))
+    L = K - V
 
-# This generates numerical version of the EL equations for use later.
-# There is some magic here you can ask me about if you are interested.
-res = euler_lagrange.get_rhs(L, funcs=ths, var=t, simplify=True)
-args = [g, m1, m2, r1, r2] + ths + dths
-_ddth1 = euler_lagrange.my_lambdify(args, res[ddths[0]])
-_ddth2 = euler_lagrange.my_lambdify(args, res[ddths[1]])
+    # This generates numerical version of the EL equations for use later.
+    # There is some magic here you can ask me about if you are interested.
+    res = euler_lagrange.get_rhs(L, funcs=ths, var=t, simplify=True)
+    args = [g, m1, m2, r1, r2] + ths + dths
+    _ddth1 = euler_lagrange.my_lambdify(args, res[ddths[0]])
+    _ddth2 = euler_lagrange.my_lambdify(args, res[ddths[1]])
 
-L = L.subs(vsubs)
-th1, th2 = symbols([r'\theta_1', r'\theta_2'])
-dth1, dth2 = symbols([r'\dot{\theta_1}', r'\dot{\theta_2}'])
+    L = L.subs(vsubs)
+    th1, th2 = symbols([r'\theta_1', r'\theta_2'])
+    dth1, dth2 = symbols([r'\dot{\theta_1}', r'\dot{\theta_2}'])
 
 
-def get_solution(th1, dth1, th2, dth2, T,
-                 g=9.81, m1=1.0, m2=1.0, r1=1.0, r2=1.0):
-    """Return the solution given the specified initial conditions and
-    parameters for 3 periods T."""
+    def get_solution(th1, dth1, th2, dth2, T,
+                     g=9.81, m1=1.0, m2=1.0, r1=1.0, r2=1.0):
+        """Return the solution given the specified initial conditions and
+        parameters for 3 periods T."""
 
-    x0 = [th1, dth1, th2, dth2]
-    Nt = 1000
-    ts = np.linspace(0, 3*T, Nt)
+        x0 = [th1, dth1, th2, dth2]
+        Nt = 1000
+        ts = np.linspace(0, 3*T, Nt)
 
-    def f(x, t):
-        th1, dth1, th2, dth2 = x
-        dth1_dt = dth1
-        dth2_dt = dth2
-        ddth1_dt = _ddth1(g, m1, m2, r1, r2, th1, th2, dth1, dth2)
-        ddth2_dt = _ddth2(g, m1, m2, r1, r2, th1, th2, dth1, dth2)
-        return dth1_dt, ddth1_dt, dth2_dt, ddth2_dt
+        def f(x, t):
+            th1, dth1, th2, dth2 = x
+            dth1_dt = dth1
+            dth2_dt = dth2
+            ddth1_dt = _ddth1(g, m1, m2, r1, r2, th1, th2, dth1, dth2)
+            ddth2_dt = _ddth2(g, m1, m2, r1, r2, th1, th2, dth1, dth2)
+            return dth1_dt, ddth1_dt, dth2_dt, ddth2_dt
 
-    th1, dth1, th2, dth2 = odeint(f, x0, ts).T
+        th1, dth1, th2, dth2 = odeint(f, x0, ts).T
 
-    Solution = namedtuple('Solution', ['t', 'theta_1', 'theta_2'])
-    return Solution(t=ts, theta_1=th1, theta_2=th2)
-'''
+        Solution = namedtuple('Solution', ['t', 'theta_1', 'theta_2'])
+        return Solution(t=ts, theta_1=th1, theta_2=th2)
+    return locals()
